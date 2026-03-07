@@ -38,14 +38,17 @@ extern const uint8_t __td2_config_start[], __td2_config_end[];
 
 extern void lamps_age(void);
 
+void send_to_host(uint8_t *s, size_t n);
+
 void debug(const char *fmt, ...) {
     char buf[1024];
     va_list args;
     va_start(args, fmt);
     vsnprintf(buf, sizeof(buf), fmt, args);
     va_end(args);
-    panel_text(buf, strlen(buf), 't');
+    //panel_text(buf, strlen(buf), 't');
     // uart_puts(uart, buf);
+    send_to_host(buf, strlen(buf));
 }
 
 // ------------------------------------------------------------

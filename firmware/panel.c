@@ -27,63 +27,60 @@
 #define PIN_RES  11    // panel reset
 #define PIN_DC   10    // panel Command/Data
 
-#define ST7789_NOP 0x00
-#define ST7789_SWRESET 0x01
-#define ST7789_RDDID 0x04
-#define ST7789_RDDST 0x09
+// Map common command names to ST7796 opcodes.
+#define ST7796_NOP      0x00
+#define ST7796_SWRESET  0x01
+#define ST7796_RDDID    0x04
+#define ST7796_RDDST    0x09
 
-#define ST7789_SLPIN 0x10
-#define ST7789_SLPOUT 0x11
-#define ST7789_PTLON 0x12
-#define ST7789_NORON 0x13
+#define ST7796_SLPIN    0x10
+#define ST7796_SLPOUT   0x11
+#define ST7796_PTLON    0x12
+#define ST7796_NORON    0x13
 
-#define ST7789_INVOFF 0x20
-#define ST7789_INVON 0x21
-#define ST7789_DISPOFF 0x28
-#define ST7789_DISPON 0x29
+#define ST7796_INVOFF   0x20
+#define ST7796_INVON    0x21
+#define ST7796_DISPOFF  0x28
+#define ST7796_DISPON   0x29
 
-#define ST7789_CASET 0x2A
-#define ST7789_RASET 0x2B
-#define ST7789_RAMWR 0x2C
-#define ST7789_RAMRD 0x2E
+#define ST7796_CASET    0x2A
+#define ST7796_RASET    0x2B
+#define ST7796_RAMWR    0x2C
+#define ST7796_RAMRD    0x2E
 
-#define ST7789_PTLAR 0x30
-#define ST7789_SCRLAR 0x33
-#define ST7789_MADCTL 0x36
-#define ST7789_VSCSAD 0x37
-#define ST7789_COLMOD 0x3A
+#define ST7796_PTLAR    0x30
+#define ST7796_SCRLAR   0x33
+#define ST7796_MADCTL   0x36
+#define ST7796_VSCSAD   0x37
+#define ST7796_COLMOD   0x3A
 
-#define ST7789_GSCAN 0x45
-#define ST7789_WRDISBV 0x51
+#define ST7796_GSCAN    0x45
+#define ST7796_WRDISBV  0x51
 
-#define ST7789_FRMCTR1 0xB1
-#define ST7789_FRMCTR2 0xB2
-#define ST7789_FRMCTR3 0xB3
-#define ST7789_INVCTR 0xB4
-#define ST7789_DISSET5 0xB6
+#define ST7796_FRMCTR1  0xB1
+#define ST7796_FRMCTR2  0xB2
+#define ST7796_FRMCTR3  0xB3
+#define ST7796_INVCTR   0xB4
+#define ST7796_DFC      0xB6
 
-#define ST7789_GCTRL 0xB7
-#define ST7789_GTADJ 0xB8
-#define ST7789_VCOMS 0xBB
+#define ST7796_PWR1     0xC0
+#define ST7796_PWR2     0xC1
+#define ST7796_PWR3     0xC2
 
-#define ST7789_LCMCTRL 0xC0
-#define ST7789_IDSET 0xC1
-#define ST7789_VDVVRHEN 0xC2
-#define ST7789_VRHS 0xC3
-#define ST7789_VDVS 0xC4
-#define ST7789_VMCTR1 0xC5
-#define ST7789_FRCTRL2 0xC6
-#define ST7789_CABCCTRL 0xC7
+#define ST7796_VCMPCTL  0xC5
 
-#define ST7789_RDID1 0xDA
-#define ST7789_RDID2 0xDB
-#define ST7789_RDID3 0xDC
-#define ST7789_RDID4 0xDD
+#define ST7796_RDID1    0xDA
+#define ST7796_RDID2    0xDB
+#define ST7796_RDID3    0xDC
 
-#define ST7789_GMCTRP1 0xE0
-#define ST7789_GMCTRN1 0xE1
+#define ST7796_GMCTRP1  0xE0
+#define ST7796_GMCTRN1  0xE1
 
-#define ST7789_PWCTR6 0xFC
+#define ST7796_DOCA     0xE8
+#define ST7796_CSCON    0xF0
+
+// Runtime-selected controller name (used for logging)
+const char *panel_controller = "ST7796";
 
 static void command(uint8_t x)
 {
@@ -105,27 +102,27 @@ static void datan(size_t n, const uint8_t *p)
 
 static void set_window(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1)
 {
-  command(ST7789_CASET);
+  command(ST7796_CASET);
   {
     uint8_t d[4] = {
       0, x0, 0, x1
     };
     datan(sizeof(d), d);
   }
-  command(ST7789_RASET);
+  command(ST7796_RASET);
   {
     uint8_t d[4] = {
       0, y0, 0, y1
     };
     datan(sizeof(d), d);
   }
-  command(ST7789_RAMWR);
+  command(ST7796_RAMWR);
 }
 
 static void cls()
 {
-  set_window(0, 0, 239, 239);
-  for (int i = 0; i < (240 * 240 * 12 / 8); i++)
+  set_window(0, 0, LCD_W - 1, LCD_H - 1);
+  for (int i = 0; i < (LCD_W * LCD_H * 2); i++)
     data1(0);
 }
 
@@ -149,7 +146,7 @@ static void show_code()
   const int w = 16, n = 6;
   char *nm = td2_boardname();
   for (int i = 0; i < n; i++) {
-    int x = (240 - w * n) / 2 + (w * i);
+    int x = (LCD_W - w * n) / 2 + (w * i);
     drawch(x, 5, nm[i]);
   }
 }
@@ -167,7 +164,7 @@ static void show_splash()
 volatile screen_t screen;
 uint32_t screen_y;
 
-static uint8_t linebuf[2][240 * 12 / 8];
+static uint8_t linebuf[2][LCD_W * 2];
 
 #if USE_DMA
 uint dma_tx;
@@ -203,12 +200,12 @@ static void render()
                       false); // don't start yet
 #endif
 
-  set_window(0, 0, 239, 239);
+  set_window(0, 0, LCD_W - 1, LCD_H - 1);
   gpio_put(PIN_DC, 1);
   screen.y = screen_y;
 
   if (1) {
-    for (int y = 0; y < 240; y++) {
+    for (int y = 0; y < LCD_H; y++) {
       int w = (y & 1);
       line1(linebuf[w], y);
 #if !USE_DMA
@@ -243,7 +240,7 @@ static void spi_out()
 
 static uint32_t gscan()
 {
-  command(ST7789_GSCAN);
+  command(ST7796_GSCAN);
   gpio_put(PIN_DC, 1);
 
   spi_in();
@@ -335,56 +332,76 @@ void panel_init()
   gpio_put(PIN_RES, 1);
   sleep_ms(50);
 
-  // command(ST7789_SWRESET);
-  // sleep_ms(150);
+  // ST7796 initialization sequence
+  sleep_ms(120);
+  command(ST7796_SWRESET); // Software reset
+  sleep_ms(120);
 
-  command(ST7789_MADCTL);
-  data1(0x0);
-  command(ST7789_FRMCTR2);
-  data1(0xc);
-  data1(0xc);
-  data1(0x0);
-  data1(0x33);
-  data1(0x33);
-  command(ST7789_COLMOD);
-  data1(0x3);
-  command(ST7789_GCTRL);
-  data1(0x14);
-  command(ST7789_VCOMS);
-  data1(0x37);
-  command(ST7789_LCMCTRL);
-  data1(0x2c);
-  command(ST7789_VDVVRHEN);
-  data1(0x1);
-  command(ST7789_VRHS);
-  data1(0x12);
-  command(ST7789_VDVS);
-  data1(0x20);
-  command(0xD0);
-  data1(0xa4);
-  data1(0xa1);
-  command(ST7789_FRCTRL2);
-  data1(0xf);
-  command(ST7789_GMCTRP1);
+  command(ST7796_SLPOUT); // Sleep exit
+  sleep_ms(120);
+
+  command(ST7796_CSCON); // Command Set control
+  data1(0xC3);   // Enable extension command 2 part I
+
+  command(ST7796_CSCON); // Command Set control
+  data1(0x96);   // Enable extension command 2 part II
+
+  command(ST7796_MADCTL); // Memory Data Access Control
+//  data1(0x48);   // MX, MY, MV RGB mode - Portrait (X-mirror, Top-left->bottom-right, RGB)
+  data1(0xE8);   // MX, MY, MV RGB mode - Landscape (X-mirror, Y-mirror, Row/column exchange, Top-left->bottom-right, RGB)
+
+  command(ST7796_COLMOD); // Interface Pixel Format
+  data1(0x55);   // 16-bit interface color format
+
+  command(ST7796_INVCTR); // Column inversion
+  data1(0x01);   // 1-dot inversion
+
+  command(ST7796_DFC); // Display Function Control
+  data1(0x80);   // Bypass
+  data1(0x02);   // Source output scan config
+  data1(0x3B);   // LCD drive line
+
+  command(ST7796_DOCA); // Display Output Ctrl Adjust
   {
-    static const uint8_t d[14] = {
-  0xd0,0x4,0xd,0x11,0x13,0x2b,0x3f,0x54,0x4c,0x18,0xd,0xb,0x1f,0x23
-    };
+    static const uint8_t d[] = { 0x40, 0x8A, 0x00, 0x00, 0x29, 0x19, 0xA5, 0x33 };
     datan(sizeof(d), d);
   }
-  command(ST7789_GMCTRN1);
+
+  command(ST7796_PWR2); // Power control 2
+  data1(0x06);
+
+  command(ST7796_PWR3); // Power control 3
+  data1(0xA7);
+
+  command(ST7796_VCMPCTL); // VCOM Control
+  data1(0x18);
+
+  sleep_ms(120);
+
+  // ST7796 Gamma Sequence (E0)
+  command(ST7796_GMCTRP1);
   {
-    static const uint8_t d[14] = {
-  0xd0,0x4,0xc,0x11,0x13,0x2c,0x3f,0x44,0x51,0x2f,0x1f,0x1f,0x20,0x23
-    };
-    datan(sizeof(d), d);
+    static const uint8_t g1[] = { 0xF0,0x09,0x0B,0x06,0x04,0x15,0x2F,0x54,0x42,0x3C,0x17,0x14,0x18,0x1B };
+    datan(sizeof(g1), g1);
   }
-  command(ST7789_INVON);
-  command(ST7789_SLPOUT);
-  cls();
-  show_splash();
-  command(ST7789_DISPON);
-  // sleep_ms(100);
+
+  // ST7796 Gamma Sequence (E1)
+  command(ST7796_GMCTRN1);
+  {
+    static const uint8_t g2[] = { 0xE0,0x09,0x0B,0x06,0x04,0x03,0x2B,0x43,0x42,0x3B,0x16,0x14,0x17,0x1B };
+    datan(sizeof(g2), g2);
+  }
+
+  sleep_ms(120);
+
+  command(ST7796_CSCON); // Disable extension command 2 part I
+  data1(0x3C);
+  command(ST7796_CSCON); // Disable extension command 2 part II
+  data1(0x69);
+  sleep_ms(120);
+
+  command(ST7796_DISPON); // Display on
+  panel_controller = "ST7796";
 
   screen.freeze = 0;
   screen.cursor = 1;

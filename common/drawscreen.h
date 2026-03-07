@@ -1,5 +1,9 @@
+//#ifndef drawscreen_h
+//#define drawscreen_h
 #include <stdint.h>
 
+#define LCD_W 240
+#define LCD_H 240
 #define COLS  60  // (240 / 4)
 #define ROWS  25  // (200 / 8)
 
@@ -26,3 +30,5 @@ typedef struct {
 
 void line1(uint8_t *dst, int y);
 void inclamp(size_t i, int32_t n);
+void debug(const char *fmt, ...);
+//#endif

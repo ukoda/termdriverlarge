@@ -38,9 +38,9 @@ char *td2_boardname();
 #define USBD_PID (0x000a) // Raspberry Pi Pico SDK CDC
 #endif
 
-#define USBD_MANUFACTURER "Excamera"
+#define USBD_MANUFACTURER "Open Source"
 
-#define USBD_PRODUCT "td2"
+#define USBD_PRODUCT "tdl"
 
 #define TUD_RPI_RESET_DESC_LEN  9
 #if !PICO_STDIO_USB_ENABLE_RESET_VIA_VENDOR_INTERFACE

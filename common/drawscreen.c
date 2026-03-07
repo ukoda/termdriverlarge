@@ -25,7 +25,8 @@ static void line_text(uint8_t *dst, int y)
 
 
 // Number of uint32_t per line
-#define WPL (240 * 3 / 8)
+// TODO: Use define for LCD size
+#define WPL (240 * 4 / 8)
 
 void modulate(uint8_t *dst, uint32_t n)
 {
@@ -44,7 +45,7 @@ void modulate(uint8_t *dst, uint32_t n)
 
 static void line_status(uint8_t *dst, int y)
 {
-  memset(dst, MAINFONT_BG * 0x11, 3 * 240 / 2);
+  memset(dst, MAINFONT_BG * 0x11, 4 * 240 / 2);
 
   uint32_t w = mainfont[0], h = mainfont[1];
   uint32_t bpl = (w * 3) / 2;
@@ -68,6 +69,7 @@ static void line_status(uint8_t *dst, int y)
           uint16_t a = (*src & 0xf) | ((*src & 0xf0) << 4);
           a = (MAINFONT_BG * 0x1010) - (a * MAINFONT_BG);
           src++;
+          *pd++ = ((a & 0xf000) >> 8) | ((a & 0x00f0) >> 4);
           *pd++ = ((a & 0xf000) >> 8) | ((a & 0x00f0) >> 4);
         }
         x += w - 1;
@@ -99,7 +101,7 @@ void line1(uint8_t *dst, int y)
   else if (y < 238)
     line_text(dst, y - 40);
   else
-    memset(dst, 0x00, 3 * 240 / 2);
+    memset(dst, 0x00, 2 * 240);
 }
 
 void inclamp(size_t i, int32_t n)

@@ -13,10 +13,8 @@ It should be noted no effort is being made to support conditional builds between
 Several other additions are likely to be added as I use it.
 
 ## To do
-* Remove OpenSCAD files as these only work for the original Excamera Labs.  The folder will remain as I may make new version for the new hardware.
 * The Excamera Labs splash image will be removed as I assume they will not want their logo used on derived works.
-* Look at changing ``#define USBD_MANUFACTURER "Excamera"`` and ``#define USBD_PRODUCT "td2"`` if doesn't break things.
-* Change the LCD driver code to support the ST7796s instead of the ST7789.
 * Change font files to suit the simpler encoding.
 * Add support for multiple size fonts to trade off readablity with the amount of info on screen.
 * May consider portrait mode support.
+
