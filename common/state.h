@@ -1,3 +1,5 @@
+#ifndef state_h
+#define state_h
 typedef struct {
   // subset of fields from cdc_line_coding_t
   uint32_t version;
@@ -7,3 +9,4 @@ typedef struct {
   uint32_t stop_bits;
 } state_t;
 
+#endif

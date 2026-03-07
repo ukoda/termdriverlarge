@@ -1,3 +1,5 @@
+#ifndef panel_h
+#define panel_h
 #include "state.h"
 
 void panel_init();
@@ -9,3 +11,4 @@ void panel_tick(void);
 void panel_lamp_tx(void);
 void panel_lamp_rx(void);
 void panel_hide_cursor(void);
+#endif

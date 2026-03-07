@@ -1,3 +1,5 @@
+# Term Driver Large
+
 This a modifed version of the jamesbowman termdriver2, https://github.com/jamesbowman/termdriver2, which is for the TermDriver 2 https://www.crowdsupply.com/excamera/termdriver-2.
 That project uses a tiny LCD and like other tools from Excamera Labs https://www.crowdsupply.com/excamera is well worth investing in.
 
@@ -13,8 +15,27 @@ It should be noted no effort is being made to support conditional builds between
 Several other additions are likely to be added as I use it.
 
 ## To do
+
 * The Excamera Labs splash image will be removed as I assume they will not want their logo used on derived works.
 * Change font files to suit the simpler encoding.
 * Add support for multiple size fonts to trade off readablity with the amount of info on screen.
 * May consider portrait mode support.
+* The `go` script is probably broken by the changes made in `usb_descriptors.c`.
 
+### Splash image changes
+
+As mentioned above the intent is to remove the Excamera Labs splash image.  I will likley replace with the OSH logo or something generic.  Once image support is working it would be good if users could add their own prefered logo without git getting in the way.  The `__has_include` directive could be used so a repo file such as `default_logo.h` could be overridden with a local `custom_logo.h`.
+
+To do this we would first add `custom_logo.h` to `.gitignore`, then add something like this where `custom_logo.h` would normally be included:
+
+```
+#if defined __has_include
+#  if __has_include (<custom_logo.h>)
+#    include <custom_logo.h>
+#  else
+#    include <default_logo.h>
+#  endif
+#else
+#  include <default_logo.h>
+#endif
+```
