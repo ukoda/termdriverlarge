@@ -33,6 +33,7 @@ add_executable(td2
     main.c
     panel.c
     ../common/drawscreen.c
+    ../common/render_fonts.c
     ../common/render_font_4x6.c
     ../common/render_font_6x9_sub.c
     ../common/text.c

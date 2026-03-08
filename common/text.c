@@ -31,7 +31,7 @@ uint32_t my_id(void)
 void text_cls()
 {
   uint32_t bl = (bg << 20) | (fg << 8) | ' ';
-  for (size_t i = 0; i < (screen.cols * 32); i++)
+  for (size_t i = 0; i < (screen.cols * 32); i++)  // TODO: Get rid of hard coded value
     screen.s[i] = bl;
 }
 
@@ -399,6 +399,7 @@ void text_ch(uint8_t ch)
       break;
 
 #define CSI(f) /*printf("Handle %c\n", ch); arg_report();*/ nargs++; f(); estate = PLAIN; break;
+//#define CSI(f) printf("Handle %c\n", ch); arg_report(); nargs++; f(); estate = PLAIN; break;
     case 'A': CSI(csi_A);
     case 'B': CSI(csi_B);
     case 'C': CSI(csi_C);

@@ -79,8 +79,7 @@
 #define ST7796_DOCA     0xE8
 #define ST7796_CSCON    0xF0
 
-// Runtime-selected controller name (used for logging)
-const char *panel_controller = "ST7796";
+
 
 static void command(uint8_t x)
 {
@@ -400,8 +399,9 @@ void panel_init()
   data1(0x69);
   sleep_ms(120);
 
+  cls();
+  show_splash();
   command(ST7796_DISPON); // Display on
-  panel_controller = "ST7796";
 
   screen.freeze = 0;
   screen.cursor = 1;

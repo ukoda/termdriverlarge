@@ -2,10 +2,17 @@
 #define drawscreen_h
 #include <stdint.h>
 
-#define LCD_W 240
-#define LCD_H 240
-#define COLS  60  // (240 / 4)
-#define ROWS  25  // (200 / 8)
+// Smallest font is 8 x 16 UbuntuMono_8
+
+// WARNING: Code in text.c is using 0x1f as bit mask often
+
+#define LCD_W 240 // Should be 480 or 320
+#define LCD_H 240 // Should be 320 or 480
+#define COLS  60  // Should be landscape 480/8  = 60, portait 320/8  = 40
+#define ROWS  32  // Should be landscape 320/16 = 20, portait 480/16 = 30
+// With smallest font 8 x 16 UbuntuMono_8
+// Landscape would be 60 characters by 20 lines
+// Portait would be   40 characters by 30 lines
 
 #define LAMP_TX   0
 #define LAMP_RX   1
@@ -18,7 +25,7 @@ typedef struct {
   uint32_t traffic;
   uint32_t cols, rows;
   uint32_t y;
-  uint32_t s[COLS * 32];
+  uint32_t s[COLS * ROWS];
   int32_t lamps[4];
   int32_t freeze;
   int32_t cursor;

@@ -12,6 +12,7 @@ extern screen_t screen;
 
 extern void line_text_4x6(uint8_t *dst, int y);
 extern void line_text_6x9_sub(uint8_t *dst, int y);
+extern void line_text_serial(uint8_t *dst, int y);
 
 #define PIXBYTES(n) ((n) * 3 / 2)
 
@@ -20,7 +21,8 @@ extern void line_text_6x9_sub(uint8_t *dst, int y);
 static void line_text(uint8_t *dst, int y)
 {
   // line_text_4x6(dst, y);
-  line_text_6x9_sub(dst, y);
+  // line_text_6x9_sub(dst, y);
+  line_text_serial(dst, y);
 }
 
 
