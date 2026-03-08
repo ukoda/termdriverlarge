@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "render_fonts.h"
 #include "drawscreen.h"
@@ -115,17 +116,17 @@ void line_text_serial(uint8_t *dst, int y)
   // Work out some stuff we will need
 
   uint8_t *dp = dst;
-  uint16_t yi = y / font->yAdvance;          // TODO: Should use font info, not hard coded 9
-  uint32_t ymod = y % font->yAdvance;   // TODO: Try uint32_t ymod = y % 9;
-//  uint32_t ymod = y - (yi * 9);   // TODO: Try uint32_t ymod = y % 9;
+  uint16_t yi = y / font->yAdvance;
+  uint32_t ymod = y % font->yAdvance;
   uint32_t *psrc = screen.s + (screen.cols * ((yi + screen.y) & 0x1f));
-  const int stride = 2 * 3;
+  uint8_t  lt, lb, yp;
+  bool     le;
 
 
   // For each character in the line of the screen buffer
 
   for (uint8_t col = 0; col < cols; col++) {
-    uint32_t el = psrc[col];            // Get the character element with it's 12 bit colours
+    uint32_t el = psrc[col];          // Get the character element with it's 12 bit colours
     uint16_t fg = (el >> 8) & 0xfff;  // 12 bit fore ground colour
     uint16_t bg = (el >> 20) & 0xfff; // 12 bit back ground colour
     uint8_t ch = el & 0xff;           // The 8 bit ASCII character
@@ -152,52 +153,91 @@ void line_text_serial(uint8_t *dst, int y)
 
     glyph = &font->glyph[ch];
     bitmap = font->bitmap;
-
     w    = glyph->width;
-    bs   = (w * ymod) / 8;
-    bo   = glyph->bitmapOffset + bs;
-    bit  = (w * ymod) % 8;
-    if (bit)
-      bits = bitmap[bo++] << bit;
-    else
-      bits = 0x00;
-    be   = 8 - w - glyph->xOffset;
 
-    if (((el & 0xff) == '0') && (col == 0) && (debuglines++ < 50))
-      debug("y=%d, yi=%d, ymod=%d, bs=%d, bo=%d, w=%d, bit=%d, bits=%02x\n", y, yi, ymod, bs, bo, w, bit, bits);
+/*
+bitmapOffset;     // Pointer into GFXfont->bitmap
+width, height;    // Bitmap dimensions in pixels
+xAdvance;         // Distance to advance cursor (x axis)
+xOffset, yOffset; // Dist from cursor pos to UL corner
+*/
+//                *                *  16
+// Offset    w    h  adv     x     y            h+y H-h  lt lb 11+y
+//{   249,   6,  10,   8,    1,   -9 }   // 'H'  1   6  (2, 4)  2
+//{   469,   6,   7,   8,    1,   -6 }   // 'e'  1   9  (5, 4)  5
+//{   485,   6,  10,   8,    1,   -6 }   // 'g'  4   6  (5, 1)  5
 
-    // Send background pixels before glyph data
+    // Work out it this line of the character is displayed
+    lt   = font->yAbove + glyph->yOffset;
+    lb   = font->yAdvance - glyph->height - lt;
+    le   = (ymod < lt) || (ymod > (font->yAdvance - lb));
 
-    for (xx = 0; xx < glyph->xOffset; xx++) {
-//      pixel_background(dp);
-      *dp++ = 0xf8;
-      *dp++ = 0x00;
-    }
+    if (le) {
+/*      
+      if ((((el & 0xff) == 'H') || ((el & 0xff) == 'e')) && ((col == 0) || (col == 1)) && (debuglines++ < 50))
+        debug("c=%c, y=%d, yi=%d, ymod=%d, lt=%d, lb=%d, empty\n",(el & 0xff) , y, yi, ymod, lt, lb);
+*/        
+      for (xx = 0; xx < glyph->xAdvance; xx++)
+//        *dp++ = 0x42;
+//        *dp++ = 0x80;
+        *dp++ = 0x00;
+        *dp++ = 0x00;
+    } else {
+      // Work out pixel related stuff
 
-    // Send pixels from glyph data
+      yp   = ymod - lt;
+      bs   = (w * yp) / 8;
+      bo   = glyph->bitmapOffset + bs;
+      bit  = (w * yp) % 8;
+      if (bit)
+        bits = bitmap[bo++] << bit;
+      else
+        bits = 0x00;
+      be   = 8 - w - glyph->xOffset;
 
-		for (xx=0; xx<w; xx++) {
-			if (!(bit++ & 7)) {
-				bits = bitmap[bo++];
-        if (((el & 0xff) == '0') && (col == 0) && (debuglines < 50))
-          debug("  bits=%02x\n", bits);
-			}
-			if (bits & 0x80) {
-					*dp++ = fg565 >> 8;
-					*dp++ = fg565;
-			} else {
-					*dp++ = bg565 >> 8;
-					*dp++ = bg565;
+//      if (((el & 0xff) == '0') && (col == 0) && (debuglines++ < 20))
+//        debug("y=%d, yi=%d, ymod=%d, bs=%d, bo=%d, w=%d, bit=%d, bits=%02x\n", y, yi, ymod, bs, bo, w, bit, bits);
+/*
+      if ((((el & 0xff) == 'H') || ((el & 0xff) == 'e')) && ((col == 0) || (col == 1)) && (debuglines++ < 50))
+        debug("c=%c, y=%d, yi=%d, ymod=%d, yp=%d, lt=%d, lb=%d, pixels\n", (el & 0xff), y, yi, ymod, yp, lt, lb);
+*/
+      // Send background pixels before glyph data
+
+      for (xx = 0; xx < glyph->xOffset; xx++) {
+  //      pixel_background(dp);
+//        *dp++ = 0xf8;
+//        *dp++ = 0x00;
+        *dp++ = 0x00;
+        *dp++ = 0x00;
       }
-			bits <<= 1;
-		}
 
-    // Send bakground pixels after glyph data
+      // Send pixels from glyph data
 
-    for (xx = 0; xx < be; xx++) {
-//      pixel_background(dp);
-      *dp++ = 0x00;
-      *dp++ = 0x1f;
+      for (xx=0; xx<w; xx++) {
+        if (!(bit++ & 7)) {
+          bits = bitmap[bo++];
+  //        if (((el & 0xff) == '0') && (col == 0) && (debuglines < 50))
+  //          debug("  bits=%02x\n", bits);
+        }
+        if (bits & 0x80) {
+            *dp++ = fg565 >> 8;
+            *dp++ = fg565;
+        } else {
+            *dp++ = bg565 >> 8;
+            *dp++ = bg565;
+        }
+        bits <<= 1;
+      }
+
+      // Send bakground pixels after glyph data
+
+      for (xx = 0; xx < be; xx++) {
+  //      pixel_background(dp);
+//        *dp++ = 0x00;
+//        *dp++ = 0x1f;
+        *dp++ = 0x00;
+        *dp++ = 0x00;
+      }
     }
   }
 }
