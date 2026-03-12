@@ -2,8 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "drawscreen.h"
+#include "panel.h"
+#include "render_fonts.h"
 
 extern screen_t screen;
 
@@ -12,7 +15,6 @@ extern screen_t screen;
 
 extern void line_text_4x6(uint8_t *dst, int y);
 extern void line_text_6x9_sub(uint8_t *dst, int y);
-extern void line_text_serial(uint8_t *dst, int y);
 
 #define PIXBYTES(n) ((n) * 3 / 2)
 
@@ -22,7 +24,7 @@ static void line_text(uint8_t *dst, int y)
 {
   // line_text_4x6(dst, y);
   // line_text_6x9_sub(dst, y);
-  line_text_serial(dst, y);
+  line_text_serial(FontUbuntuMono_8, dst, y);
 }
 
 

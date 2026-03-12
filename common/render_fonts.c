@@ -91,9 +91,9 @@ void pixel_background(uint8_t *dst)
   This routine loads dst buffer with a line of pixel data that will be DMA'd
   to the LCD.
 */
-void line_text_serial(uint8_t *dst, int y)
+void line_text_serial(TFont fontnum, uint8_t *dst, int y)
 {
-  GFXfont *font = (GFXfont *)&UbuntuMono_8;
+  const GFXfont *font;
   GFXglyph *glyph;
 	uint8_t  *bitmap;
 	uint16_t bs, bo;
@@ -106,7 +106,12 @@ void line_text_serial(uint8_t *dst, int y)
 
   // Copy some hardcoded values to vars to make future dynamic font changes easier
 
-  uint8_t cols = COLS;
+  // Font choice
+
+  switch (fontnum) {
+    default:
+      font = &UbuntuMono_8;
+  }
 
   // Fore ground and back ground colours in 12 bit and 16 bit formats
 
@@ -118,14 +123,14 @@ void line_text_serial(uint8_t *dst, int y)
   uint8_t *dp = dst;
   uint16_t yi = y / font->yAdvance;
   uint32_t ymod = y % font->yAdvance;
-  uint32_t *psrc = screen.s + (screen.cols * ((yi + screen.y) & 0x1f));
+  uint32_t *psrc = screen.s + (screen.cols * ((yi + screen.y) % screen.rows));
   uint8_t  lt, lb, yp;
   bool     le;
 
 
   // For each character in the line of the screen buffer
 
-  for (uint8_t col = 0; col < cols; col++) {
+  for (uint8_t col = 0; col < screen.cols; col++) {
     uint32_t el = psrc[col];          // Get the character element with it's 12 bit colours
     uint16_t fg = (el >> 8) & 0xfff;  // 12 bit fore ground colour
     uint16_t bg = (el >> 20) & 0xfff; // 12 bit back ground colour
@@ -225,11 +230,13 @@ xOffset, yOffset; // Dist from cursor pos to UL corner
         } else {
             *dp++ = bg565 >> 8;
             *dp++ = bg565;
+            // *dp++ = 0x00;
+            // *dp++ = 0x00;
         }
         bits <<= 1;
       }
 
-      // Send bakground pixels after glyph data
+      // Send background pixels after glyph data
 
       for (xx = 0; xx < be; xx++) {
   //      pixel_background(dp);

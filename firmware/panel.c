@@ -16,6 +16,7 @@
 #include "drawscreen.h"
 #include "text.h"
 #include "state.h"
+#include "panel.h"
 
 #define spi spi1
 
@@ -163,7 +164,7 @@ static void show_splash()
 volatile screen_t screen;
 uint32_t screen_y;
 
-static uint8_t linebuf[2][LCD_W * 2];
+static uint8_t linebuf[2][LCD_M * 2];
 
 #if USE_DMA
 uint dma_tx;
@@ -466,6 +467,8 @@ void panel_line_coding(state_t const* line_coding)
       stops[line_coding->stop_bits]);
  }
 }
+
+
 
 // draw text on the panel
 // dir:'t' LAMP_TX, 'r' LAMP_RX

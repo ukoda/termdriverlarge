@@ -38,6 +38,12 @@ typedef enum {
 
 
 
+typedef enum {
+	FontUbuntuMono_8	// Smallest fixed point font
+} TFont;
+
+
+
 /*****************************************************************************
     Types
  *****************************************************************************/
@@ -70,4 +76,12 @@ typedef struct GFXfont { // Data stored for FONT AS A WHOLE:
 	uint8_t	  yBelow;      // Maximum amount below base line characters reach
 	   	   	   	   	   	   // It is the maximum value of any glyph->yOffset[n]+glyph->height
 } GFXfont;
+
+
+
+/*****************************************************************************
+    Functions
+ *****************************************************************************/
+extern void line_text_serial(TFont fontnum, uint8_t *dst, int y);
+
 #endif

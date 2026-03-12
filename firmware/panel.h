@@ -1,6 +1,7 @@
 #ifndef panel_h
 #define panel_h
 #include "state.h"
+#include "render_fonts.h"
 
 void panel_init();
 void panel_line_coding(state_t const* line_coding);

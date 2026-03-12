@@ -31,7 +31,8 @@ uint32_t my_id(void)
 void text_cls()
 {
   uint32_t bl = (bg << 20) | (fg << 8) | ' ';
-  for (size_t i = 0; i < (screen.cols * 32); i++)  // TODO: Get rid of hard coded value
+
+  for (uint16_t i = 0; i < (screen.cols * screen.rows); i++)
     screen.s[i] = bl;
 }
 
@@ -43,19 +44,18 @@ static void sgr_0(void)
 
 void text_init()
 {
-  screen.cols = 40;
-  screen.rows = 22;
+  screen.cols = COLS;
+  screen.rows = ROWS;
   cx = cy = 0;
   sgr_0();
   screen_y = 0;
   text_cls();
   estate = PLAIN;
-  screen.cols = 40;
 }
 
 static inline uint32_t xf(uint32_t y)
 {
-  return ((screen_y + y) & 0x1f);
+  return ((screen_y + y) % screen.rows);
 }
 
 static inline void fill_u32(uint32_t * __restrict dst, uint32_t v, size_t n) {
@@ -72,8 +72,9 @@ static void clrline(uint32_t y)
   uint32_t bl = (bg << 20) | (fg << 8) | 0x20;
   uint32_t *pd = &screen.s[xf(y) * screen.cols];
 
-  // for (size_t i = 0; i < (1 * screen.cols); i++) *pd++ = bl;
-  fill_u32(pd, bl, screen.cols);
+  for (size_t i = 0; i < screen.cols; i++)
+    *pd++ = bl;
+  // fill_u32(pd, bl, screen.cols);
 }
 
 void down1()
@@ -319,7 +320,7 @@ void csi_K()
   uint32_t bl = (bg << 20) | (fg << 8) | ' ';
   if ((nargs == 0) || (args[0] == 0)) {
     for (size_t i = cx; i < screen.cols; i++)
-      screen.s[((cy + screen_y) & 0x1f) * screen.cols + i] = bl;
+      screen.s[((cy + screen_y) % screen.rows) * screen.cols + i] = bl;
   }
   return;
 }
@@ -354,7 +355,7 @@ void text_ch(uint8_t ch)
         // printf("Illegal %#x\n", ch);
         ch = '?';
       }
-      screen.s[((cy + screen_y) & 0x1f) * screen.cols + cx] = (bg << 20) | (fg << 8) | ch;
+      screen.s[((cy + screen_y) % screen.rows) * screen.cols + cx] = (bg << 20) | (fg << 8) | ch;
       if (++cx == screen.cols) {
         cx = 0;
         down1();
@@ -433,7 +434,7 @@ static uint32_t under_cursor;
 void hide_cursor(void)
 {
   if (screen.cursor) {
-    uint32_t *pc = &screen.s[((cy + screen_y) & 0x1f) * screen.cols + cx];
+    uint32_t *pc = &screen.s[((cy + screen_y) % screen.rows) * screen.cols + cx];
     *pc = under_cursor;
   }
 }
@@ -441,7 +442,7 @@ void hide_cursor(void)
 void show_cursor(void)
 {
   if (screen.cursor) {
-    uint32_t *pc = &screen.s[((cy + screen_y) & 0x1f) * screen.cols + cx];
+    uint32_t *pc = &screen.s[((cy + screen_y) % screen.rows) * screen.cols + cx];
     under_cursor = *pc;
     *pc &= 0x000fffff;
     *pc |= 0xf0000000;
