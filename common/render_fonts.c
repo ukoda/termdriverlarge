@@ -64,10 +64,11 @@ uint16_t convert444to565(uint16_t pixel)
 
   This routine saves a pixel in the foreground colour.
 */
-void pixel_foreground(uint8_t *dst)
+uint8_t* pixel_foreground(uint8_t *dst)
 {
   *dst++ = fg565 >> 8;
   *dst++ = fg565;
+  return dst;
 }
 
 
@@ -77,10 +78,11 @@ void pixel_foreground(uint8_t *dst)
 
   This routine saves a pixel in the background colour.
 */
-void pixel_background(uint8_t *dst)
+uint8_t* pixel_background(uint8_t *dst)
 {
   *dst++ = bg565 >> 8;
   *dst++ = bg565;
+  return dst;
 }
 
 
@@ -173,9 +175,13 @@ xOffset, yOffset; // Dist from cursor pos to UL corner
 //{   485,   6,  10,   8,    1,   -6 }   // 'g'  4   6  (5, 1)  5
 
     // Work out it this line of the character is displayed
-    lt   = font->yAbove + glyph->yOffset;
-    lb   = font->yAdvance - glyph->height - lt;
-    le   = (ymod < lt) || (ymod > (font->yAdvance - lb));
+    lt   = font->yAbove + glyph->yOffset;                  // Blank lines above glyph
+    lb   = font->yAdvance - glyph->height - lt;            // Lowest line with pixels for glyph
+    le   = (ymod < lt) || (ymod >= (font->yAdvance - lb)); // (ymod > (font->yAdvance - lb)) too long:
+    // 1. Sub 1 from (font->yAdvance - lb)
+    // 2. Add 1 to lb
+    // 3. Sub 1 from lt
+    // Need to work out which case is wrong. This will get rid of blue line at base of space so to end of line.
 
     if (le) {
 /*      
@@ -183,10 +189,16 @@ xOffset, yOffset; // Dist from cursor pos to UL corner
         debug("c=%c, y=%d, yi=%d, ymod=%d, lt=%d, lb=%d, empty\n",(el & 0xff) , y, yi, ymod, lt, lb);
 */        
       for (xx = 0; xx < glyph->xAdvance; xx++)
-//        *dp++ = 0x42;
-//        *dp++ = 0x80;
-        *dp++ = 0x00;
-        *dp++ = 0x00;
+/*      
+        if (ymod < lt) {
+          *dp++ = 0x07;
+          *dp++ = 0xe0;
+        } else {
+          *dp++ = 0x42;
+          *dp++ = 0x80;
+        }
+*/          
+        dp = pixel_background(dp);
     } else {
       // Work out pixel related stuff
 
@@ -209,11 +221,7 @@ xOffset, yOffset; // Dist from cursor pos to UL corner
       // Send background pixels before glyph data
 
       for (xx = 0; xx < glyph->xOffset; xx++) {
-  //      pixel_background(dp);
-//        *dp++ = 0xf8;
-//        *dp++ = 0x00;
-        *dp++ = 0x00;
-        *dp++ = 0x00;
+        dp = pixel_background(dp);
       }
 
       // Send pixels from glyph data
@@ -225,13 +233,9 @@ xOffset, yOffset; // Dist from cursor pos to UL corner
   //          debug("  bits=%02x\n", bits);
         }
         if (bits & 0x80) {
-            *dp++ = fg565 >> 8;
-            *dp++ = fg565;
+          dp = pixel_foreground(dp);
         } else {
-            *dp++ = bg565 >> 8;
-            *dp++ = bg565;
-            // *dp++ = 0x00;
-            // *dp++ = 0x00;
+          dp = pixel_background(dp);
         }
         bits <<= 1;
       }
@@ -239,11 +243,7 @@ xOffset, yOffset; // Dist from cursor pos to UL corner
       // Send background pixels after glyph data
 
       for (xx = 0; xx < be; xx++) {
-  //      pixel_background(dp);
-//        *dp++ = 0x00;
-//        *dp++ = 0x1f;
-        *dp++ = 0x00;
-        *dp++ = 0x00;
+        dp = pixel_background(dp);
       }
     }
   }
