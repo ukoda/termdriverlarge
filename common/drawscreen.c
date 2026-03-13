@@ -102,10 +102,12 @@ void line1(uint8_t *dst, int y)
     line_text(dst, 1), modulate(dst, 12);
   else if (y == 42)
     line_text(dst, 2), modulate(dst, 13);
-  else if (y < 238)
-    line_text(dst, y - 40);
+  else if ((y == 43) || (y == 44))
+    memset(dst, 0x00, 2 * LCD_W);
+  else if (y < (LCD_H - 2))
+    line_text(dst, y - 44);
   else
-    memset(dst, 0x00, 2 * 240);
+    memset(dst, 0x00, 2 * LCD_W);
 }
 
 void inclamp(size_t i, int32_t n)

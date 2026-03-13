@@ -6,11 +6,11 @@
 
 // WARNING: Code in text.c is using 0x1f as bit mask often
 
-#define LCD_W 240 // Should be 480 or 320
-#define LCD_H 240 // Should be 320 or 480
-#define LCD_M 240 // The larger of LCD_W and LCD_H, should be 480
-#define COLS  30  // Should be landscape 480/8  = 60, portait 320/8  = 40
-#define ROWS  12  // Should be landscape 320/16 = 20, portait 480/16 = 30
+#define LCD_W 480 // Should be 480 or 320
+#define LCD_H 320 // Should be 320 or 480
+#define LCD_M 480 // The larger of LCD_W and LCD_H, should be 480
+#define COLS  60  // Should be landscape 480/8  = 60, portait 320/8  = 40
+#define ROWS  20  // Should be landscape 320/16 = 20, portait 480/16 = 30
 // With smallest font 8 x 16 UbuntuMono_8
 // Landscape would be 60 characters by 20 lines
 // Portait would be   40 characters by 30 lines

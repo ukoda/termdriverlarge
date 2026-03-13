@@ -325,6 +325,21 @@ void csi_K()
   return;
 }
 
+
+
+/*
+  text_ch routine
+
+  Add a ASCII character to the buffer or process special characters such as
+    ANSI colours, don't use the '1' bold:
+      Dim foreground 30 to 37
+      Bright foreground 90 to 97
+      Dim background 40 to 47
+      Bright foreground 100 to 107
+      e.g. White on blue background use '\033[97;104m'
+           Return to normal use '\033[0m'
+      See https://en.wikipedia.org/wiki/ANSI_escape_code#3-bit_and_4-bit
+*/
 void text_ch(uint8_t ch)
 {
   // printf("text_ch(%02x) estate=%d\n", ch, (int)estate);

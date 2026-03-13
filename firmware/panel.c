@@ -100,19 +100,19 @@ static void datan(size_t n, const uint8_t *p)
   spi_write_blocking(spi, p, n);
 }
 
-static void set_window(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1)
+static void set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
 {
   command(ST7796_CASET);
   {
     uint8_t d[4] = {
-      0, x0, 0, x1
+      x0 >> 8, x0, x1 >> 8, x1
     };
     datan(sizeof(d), d);
   }
   command(ST7796_RASET);
   {
     uint8_t d[4] = {
-      0, y0, 0, y1
+      y0 >> 8, y0, y1 >> 8, y1
     };
     datan(sizeof(d), d);
   }
