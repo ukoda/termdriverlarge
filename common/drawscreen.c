@@ -21,6 +21,12 @@ extern void line_text_6x9_sub(uint8_t *dst, int y);
 #define LAMP_BPL (LAMP_W * 3 / 2)
 
 
+static uint32_t get_lamp_colour(uint8_t lamp)
+{
+  uint32_t bightness = screen.lamps[lamp] >> 4;
+  return 0x08000000 | (bightness << 8) | (bightness << 12) | (bightness << 16);
+}
+
 
 static void line_text(uint8_t *dst, int y)
 {
@@ -33,7 +39,12 @@ static void line_text(uint8_t *dst, int y)
 static void line_status(uint8_t *dst, int y)
 {
     uint32_t status[COLS * ROWS];   // TODO: Make smaller once we change to a bigger font
-    const char statusstr[] = "TXD RXD RTS DTR";
+    const char txdstr[] = "TXD";
+    const char rxdstr[] = "RXD";
+    const char rtsstr[] = "RTS";
+    const char dtrstr[] = "DTR";
+    uint32_t lampb;
+
     uint8_t cp, x;
 
     memset(status, 0x00, sizeof(status));
@@ -41,15 +52,37 @@ static void line_status(uint8_t *dst, int y)
 
     status[cp++] = 0x888fff20;    // Left border
 
-    // Activity 'lamps'
+    // TXD 'lamp'
 
-    for (x = 0; statusstr[x]; x++) {
-      status[cp++] = 0x080fff00 | statusstr[x];
+    lampb = get_lamp_colour(LAMP_TX);
+    for (x = 0; x < 3; x++) {
+      status[cp++] = lampb | txdstr[x];
     }
+    status[cp++] = 0x888fff20;  // Gap
 
-    // Gap
+    // RXD 'lamp'
 
-    status[cp++] = 0x888fff20;
+    lampb = get_lamp_colour(LAMP_RX);
+    for (x = 0; x < 3; x++) {
+      status[cp++] = lampb | rxdstr[x];
+    }
+    status[cp++] = 0x888fff20;  // Gap
+
+    // RTS 'lamp'
+
+    lampb = get_lamp_colour(LAMP_RTS);
+    for (x = 0; x < 3; x++) {
+      status[cp++] = lampb | rtsstr[x];
+    }
+    status[cp++] = 0x888fff20;  // Gap
+
+    // DTR 'lamp'
+
+    lampb = get_lamp_colour(LAMP_DTR);
+    for (x = 0; x < 3; x++) {
+      status[cp++] = lampb | dtrstr[x];
+    }
+    status[cp++] = 0x888fff20;  // Gap
 
     // Serial port settings
 
@@ -57,9 +90,10 @@ static void line_status(uint8_t *dst, int y)
       status[cp++] = 0x008fff00 | screen.mode[x];
     }
 
-    // Gap
+    // Fill to end of line
 
-    status[cp++] = 0x888fff20;
+    for (x = 0; x < 11; x++)
+      status[cp++] = 0x888fff20;
 
     // Do the actual render
 
