@@ -350,6 +350,8 @@ static void load_defaults()
   set_state(&default_state);
 }
 
+
+
 int main()
 {
   uart_init(uart, 115200);

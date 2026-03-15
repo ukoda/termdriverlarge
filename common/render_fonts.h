@@ -39,7 +39,8 @@ typedef enum {
 
 
 typedef enum {
-	FontUbuntuMono_8	// Smallest fixed point font
+	FontUbuntuMono_8,	// Smallest fixed point font
+	FontFreeMono_12		// Fixed point font
 } TFont;
 
 
@@ -82,6 +83,7 @@ typedef struct GFXfont { // Data stored for FONT AS A WHOLE:
 /*****************************************************************************
     Functions
  *****************************************************************************/
-extern void line_text_serial(TFont fontnum, uint8_t *dst, int y);
+extern void line_blank(uint8_t *dst, uint16_t colour);
+extern void line_text_serial(TFont fontnum, uint8_t *dst, int y, uint32_t *src, bool wrap);
 
 #endif

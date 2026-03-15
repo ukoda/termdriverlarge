@@ -255,6 +255,7 @@ void csi_H()
   }
 }
 
+//void display_fontParameter(void);
 void csi_J()
 {
   if (nargs == 0)
@@ -263,7 +264,9 @@ void csi_J()
   case 2:
     text_cls();
     cx = cy = 0;  // match behavior of DOS ANSI.SYS
+//    display_fontParameter();
     break;
+
   default:
     return;
   }

@@ -23,6 +23,7 @@ Several other additions have been added, or are likely to be added as I use it. 
 * May consider portrait mode support.
 * The `go` script is probably broken by the changes made in `usb_descriptors.c`.
 * CMake / make still have `td2` as the target.  This should probably be changed to `tdl`.
+* ``watch`` and ``minicom`` cuase issues.  May be issue with original code.
 
 ### Splash image changes
 
