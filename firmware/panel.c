@@ -151,20 +151,63 @@ static void show_code()
   }
 }
 
+static uint8_t linebuf[2][LCD_M * 2];
+
+
 static void show_splash()
 {
-  int y = 180;
+  uint16_t y = 180;
   set_window(0, y, GUIDE_W - 1, y + GUIDE_H - 1);
+
+  uint32_t status[COLS * ROWS];   // TODO: Make smaller once we change to a bigger font
+  const char txdstr[] = "TXD";
+  const char rxdstr[] = "RXD";
+  const char rtsstr[] = "RTS";
+  const char dtrstr[] = "DTR";
+  uint8_t dst[LCD_W];
+
+  uint8_t cp;
+  uint16_t x;
+
+  for (y = 0; y < 20; y++) {
+    memset(status, 0x00, sizeof(status));
+    cp = 0;
+
+  //  status[cp++] = 0x888fff20;    // Left border
+
+    // TXD guide
+
+    for (x = 0; x < 3; x++) {
+      status[cp++] = 0x888fff00 | txdstr[x];
+    }
+
+    // RXD guide
+
+    for (x = 0; x < 3; x++) {
+      status[cp++] = 0x888fff00 | rxdstr[x];
+    }
+    line_text_serial(FontFreeMono_12, linebuf[0], y, status, false);
+    linebuf[0][0] = 0xff;
+    linebuf[0][1] = 0xff;
+    linebuf[0][2] = 0xff;
+    linebuf[0][3] = 0xff;
+    datan(sizeof(linebuf[0]), linebuf[0]);
+
+//    for (x = 0; x < LCD_W; x++)
+//      data1(linebuf[0][x]);
+  }
+
+/*
   for (int i = 0; i < sizeof(guide_240); i++)
     data1(guide_240[i]);
+*/
 
-  show_code();
+//  show_code();
 }
 
 volatile screen_t screen;
 uint32_t screen_y;
 
-static uint8_t linebuf[2][LCD_M * 2];
 
 #if USE_DMA
 uint dma_tx;
@@ -413,6 +456,7 @@ void panel_init()
   strcpy((char*)screen.mode, "ready");
   text_init();
   show_cursor();
+  screen.traffic = 1;
 
 #if !MANUFACTURING
   multicore_launch_core1(panel_refresh);
