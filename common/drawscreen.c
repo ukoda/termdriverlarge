@@ -23,8 +23,11 @@ extern void line_text_6x9_sub(uint8_t *dst, int y);
 
 static uint32_t get_lamp_colour(uint8_t lamp)
 {
-  uint32_t bightness = screen.lamps[lamp] >> 4;
-  return 0x08000000 | (bightness << 8) | (bightness << 12) | (bightness << 16);
+//  uint32_t bightness = screen.lamps[lamp] >> 4;
+//  return 0x0a000000 | (bightness << 8) | (bightness << 12) | (bightness << 16); // Black to white on green 
+
+  uint32_t bightness = screen.lamps[lamp] >> 5; // White on dark green to light green
+  return (bightness << 24) + 0x040fff00;
 }
 
 
