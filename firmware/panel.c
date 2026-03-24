@@ -521,7 +521,7 @@ void panel_text(const uint8_t *tx_buf, size_t n, int dir)
   screen.traffic = 1;
   hide_cursor();
   for (size_t i = 0; i < n; i++) {
-    text_ch(tx_buf[i]);
+    text_ch(tx_buf[i], dir);
   }
   show_cursor();
 

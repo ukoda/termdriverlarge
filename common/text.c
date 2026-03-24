@@ -18,6 +18,7 @@ static uint32_t cx, cy;   // Cursor x, y
 static uint32_t fg, bg;   // foreground, background as RGB-444
 static enum {PLAIN, ESC, BODY} estate;
 static uint32_t args[MAXARGS], nargs;
+static bool ansi = false;
 
 static const uint16_t c256[256] = {
 #include "c256.i"
@@ -110,6 +111,7 @@ static void default_missing(uint32_t x)
 
 void csi_m()
 {
+  ansi = true;
   // arg_report();
   if (nargs == 0) {
     sgr_0();
@@ -343,7 +345,7 @@ void csi_K()
            Return to normal use '\033[0m'
       See https://en.wikipedia.org/wiki/ANSI_escape_code#3-bit_and_4-bit
 */
-void text_ch(uint8_t ch)
+void text_ch(uint8_t ch, int dir)
 {
   // printf("text_ch(%02x) estate=%d\n", ch, (int)estate);
   if (estate == PLAIN) {
@@ -372,6 +374,12 @@ void text_ch(uint8_t ch)
       if ((ch < 32) || (127 <= ch)) {
         // printf("Illegal %#x\n", ch);
         ch = '?';
+      }
+      if (!ansi) {
+        if (dir == 't')
+          fg = 0x0f0;
+        else if (dir == 'r')
+          fg = 0xfff;
       }
       screen.s[((cy + screen_y) % screen.rows) * screen.cols + cx] = (bg << 20) | (fg << 8) | ch;
       if (++cx == screen.cols) {
@@ -443,7 +451,7 @@ void text_str(const uint8_t *s)
   // printf("text_str(%s)\n", s);
   const uint8_t *pc;
   for (pc = s; *pc; pc++)
-    text_ch(*pc);
+    text_ch(*pc, 0);
   // printf("cursor (%d,%d) screen_y %x\n\n", cx, cy, screen_y);
 }
 

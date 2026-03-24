@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 void text_init();
-void text_ch(uint8_t ch);
+void text_ch(uint8_t ch, int dir);
 void text_str(const uint8_t *s);
 void hide_cursor();
 void show_cursor();
