@@ -364,6 +364,7 @@ void text_ch(uint8_t ch, int dir)
 
     case '\n':
       down1();
+      cx = 0;   // Unix style, ommit this line for Windows style
       break;
 
     case 27:
