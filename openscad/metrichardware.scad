@@ -19,6 +19,14 @@
 
 //use <SomeLibrary.scad>;
 
+// Control rendering quality
+
+$fa        = 1;
+$fs        = 0.1;
+
+Overlap    = 0.05;
+showsample = true;
+
 /*-----------------------------------------------------------------------------
 
   Hole sizes
@@ -143,4 +151,11 @@ module VESA75Holes (
   translate([VESA75Spacing/-2, Depth/-2, VESA75Spacing/-2])
   rotate([90, 0 , 0])
     cylinder(h = Depth, d = VESA75Pass, center = true);
+}
+
+
+// === Show samples ===
+
+if (showsample) {
+  M3Pillar(5);
 }
